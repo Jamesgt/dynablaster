@@ -1,0 +1,16 @@
+doctype html
+html
+	head
+		title Dynablaster
+		script(src='http://localhost:35729/livereload.js?snipver=1')
+		script(src='libs/jquery.min.js')
+		script(src='libs/three.min.js')
+		script(src='game.js')
+
+		mixin css(href)
+			link(type='text/css', rel='stylesheet', href=href)
+
+		+css('game.css')
+	body
+		button#reset Reset
+		span#container

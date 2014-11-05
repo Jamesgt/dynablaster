@@ -1,6 +1,7 @@
 Renderer
 
 	PassEventEmitter = require './PassEventEmitter.coffee.md'
+	Table = require './Table.coffee.md'
 
 	module.exports = class Renderer extends PassEventEmitter
 
@@ -20,25 +21,19 @@ Renderer
 				'1': @getMaterial 0xff9999, 'res/disturb.jpg'
 				'2': @getMaterial 0x99ff99, 'res/disturb.jpg'
 				'B': @getMaterial 0xffffff, 'res/lavatile.jpg'
+				'F': @getMaterial 0xffffff, 'res/fire-jpg_256.jpg'
 
 			@scene = new THREE.Scene()
 			@scene.add new THREE.AmbientLight new THREE.Color 0xffffff
 
-			@container = new THREE.Object3D()
-			@scene.add @container
-
 			geometry = new THREE.PlaneBufferGeometry @table.w * @tileSize, @table.h * @tileSize, 1, 1
 			@base = new THREE.Mesh geometry, @materials['_']
-			@container.add @base
+			@scene.add @base
 
-			@walls = new THREE.Object3D()
-			@scene.add @walls
-
-			@players = new THREE.Object3D()
-			@scene.add @players
-
-			@bombs = new THREE.Object3D()
-			@scene.add @bombs
+			@scene.add @walls = new THREE.Object3D()
+			@scene.add @players = new THREE.Object3D()
+			@scene.add @bombs = new THREE.Object3D()
+			@scene.add @fires = new THREE.Object3D()
 
 			@on 'update', => @update()
 			@on 'render', => requestAnimationFrame => @render()
@@ -72,10 +67,10 @@ Renderer
 			return material
 
 		getEntity: (type, x, y) ->
+			return if type is Table.EMPTY
 			material = @materials[type]
 			geometry = switch type
-				when 'X' then new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
-				when 'S' then new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
+				when 'X','S','F' then new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
 				when '1', '2' then new THREE.SphereGeometry @tileSize/2-2
 				when 'B' then new THREE.SphereGeometry @tileSize/2-4
 
@@ -88,15 +83,19 @@ Renderer
 			@walls.children = []
 			@players.children = []
 			@bombs.children = []
+			@fires.children = []
 			for y in [0...@table.h]
 				for x in [0...@table.w]
-					for layer in [0...2]
-						type = @table.get layer, x, y
-						entity = @getEntity type, x, y
-						switch type
-							when 'X', 'S' then @walls.add entity
-							when '1', '2' then @players.add entity
-							when 'B' then @bombs.add entity
+					type = @table.get Table.LAYER.BASE, x, y
+					entity = @getEntity type, x, y
+					switch type
+						when 'X', 'S' then @walls.add entity
+						when '1', '2' then @players.add entity
+					type = @table.get(Table.LAYER.DELAYED, x, y).type
+					entity = @getEntity type, x, y
+					switch type
+						when 'B' then @bombs.add entity
+						when 'F' then @fires.add entity
 			@emit 'render'
 
 		render: ->

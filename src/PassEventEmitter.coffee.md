@@ -15,6 +15,12 @@ Just another dead simple event emitter.
 			callback e for callback in @_events[name] if @_events[name]?
 			return
 
+		emitLater: (name, e, timeOut) ->
+			unless timeOut?
+				setTimeout (=> @emit name), e
+			else
+				setTimeout (=> @emit name, e), timeOut
+
 		pass: (names, target) ->
 			# if names is an object ([] or {} or ->) and target is null
 			if names is Object(names) and not target?

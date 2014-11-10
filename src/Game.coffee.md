@@ -1,12 +1,12 @@
 Game base class
 
-	Table = require './Table.coffee.md'
-	Renderer = require './Renderer.coffee.md'
-	Player = require './Player.coffee.md'
-	Keyboard = require './Keyboard.coffee.md'
-	PassEventEmitter = require './PassEventEmitter.coffee.md'
+	{Table} = require './Table.coffee.md'
+	{Renderer} = require './Renderer.coffee.md'
+	{Player} = require './Player.coffee.md'
+	{Keyboard} = require './Keyboard.coffee.md'
+	{PassEventEmitter} = require 'pee'
 
-	module.exports = class Game extends PassEventEmitter
+	class exports.Game extends PassEventEmitter
 
 		w: 13
 		h: 13

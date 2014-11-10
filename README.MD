@@ -14,7 +14,7 @@ Plans:
 - Multiplayer
   - 5 player
   - p (webrtc)
-- Resources
+- Resources (http://texturelib.com/)
     - player animation
     - bomb animation
 - Level generator

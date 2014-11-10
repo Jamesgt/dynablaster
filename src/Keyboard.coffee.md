@@ -1,8 +1,8 @@
 Keyboard
 
-	PassEventEmitter = require './PassEventEmitter.coffee.md'
+	{PassEventEmitter} = require 'pee'
 
-	module.exports = class Keyboard extends PassEventEmitter
+	class exports.Keyboard extends PassEventEmitter
 
 		INTERVAL: 250
 

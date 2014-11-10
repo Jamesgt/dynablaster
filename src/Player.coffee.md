@@ -1,9 +1,9 @@
 Player
 
-	PassEventEmitter = require './PassEventEmitter.coffee.md'
-	Table = require './Table.coffee.md'
+	{PassEventEmitter} = require 'pee'
+	{Table} = require './Table.coffee.md'
 
-	module.exports = class Player extends PassEventEmitter
+	class exports.Player extends PassEventEmitter
 
 		constructor: (@id, @table, @x, @y) ->
 			@firePower = 2

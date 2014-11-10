@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/Jamesgt/dynablaster"
   },
-  "dependencies": {
+  "devDependencies": {
     "express": "~4.10.1",
     "bower": "*",
     "morgan": "~1.4.1",
@@ -27,6 +27,7 @@
     "gulp-browserify": "~0.5.0",
     "coffeeify": "~0.7.0",
     "gulp-rename": "~1.2.0",
-    "gulp-uglify": "~1.0.1"
+    "gulp-uglify": "~1.0.1",
+    "pee": "0.0.5"
   }
 }

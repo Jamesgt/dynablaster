@@ -1,9 +1,9 @@
 Renderer
 
-	PassEventEmitter = require './PassEventEmitter.coffee.md'
-	Table = require './Table.coffee.md'
+	{PassEventEmitter} = require 'pee'
+	{Table} = require './Table.coffee.md'
 
-	module.exports = class Renderer extends PassEventEmitter
+	class exports.Renderer extends PassEventEmitter
 
 		tileSize: 50
 

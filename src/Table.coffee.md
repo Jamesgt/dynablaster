@@ -1,8 +1,8 @@
 Table
 
-	PassEventEmitter = require './PassEventEmitter.coffee.md'
+	{PassEventEmitter} = require 'pee'
 
-	module.exports = class Table extends PassEventEmitter
+	class exports.Table extends PassEventEmitter
 
 		@LAYER =
 			BASE: 0

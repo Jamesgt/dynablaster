@@ -15,13 +15,15 @@ Keyboard
 			$('body').keydown (e) => @key e.keyCode, yes
 			$('body').keyup (e) => @key e.keyCode, no
 
+			@on 'trigger', (e) => @trigger e
+
 		key: (key, down) ->
 			return unless @keys[key]? # skip if key is not watched
 
 			if down
 				unless @status[key]?
 					@trigger key
-					@status[key] = setInterval (=> @trigger key), @INTERVAL
+					@status[key] = @emitEvery 'trigger', key, @INTERVAL
 			else
 				clearInterval @status[key]
 				delete @status[key]

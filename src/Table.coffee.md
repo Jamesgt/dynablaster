@@ -14,6 +14,7 @@ Table
 		@EMPTY: '.'
 		@WALL: 'X'
 		@STONE: 'S'
+		@POWER_UP: 'P'
 		@BOMB: 'B'
 		@FIRE: 'F'
 
@@ -24,21 +25,22 @@ Table
 
 		clear: () ->
 			@tables = [
-				for [0...@h] then for [0...@w] then Table.EMPTY
+				for [0...@h] then for [0...@w] then type: Table.EMPTY
 				for [0...@h] then for [0...@w] then type: Table.EMPTY
 			]
 
 		standard: ->
 			# walls
-			@set 0, x, y, Table.WALL for y in [1...@h] by 2 for x in [1...@w] by 2
+			@set 0, x, y, type: Table.WALL for y in [1...@h] by 2 for x in [1...@w] by 2
 			# random stone blocks
 			for y in [0...@h]
-				for x in [0...@w] when @get(Table.LAYER.BASE, x, y) is Table.EMPTY
-					@set 0, x, y, Table.STONE if Math.random() > 0.5
+				for x in [0...@w] when @get(Table.LAYER.BASE, x, y).type is Table.EMPTY
+					@set 0, x, y, type: Table.STONE if Math.random() > 0.5
 
 			@emit 'update'
 
 		set: (layer, x, y, v) ->
+			@emit 'remove', @tables[layer][y][x].meshId if @tables[layer][y][x].meshId?
 			@tables[layer][y][x] = v
 
 		get: (layer, x, y) ->
@@ -89,8 +91,8 @@ Table
 		fire: (x, y) ->
 			return yes if x < 0 or x >= @w or y < 0 or y >= @h # edge
 			cell = @get Table.LAYER.BASE, x, y
-			@emit 'death', cell unless isNaN parseInt cell # player
-			switch cell
+			@emit 'death', cell.type unless isNaN parseInt cell.type # player
+			switch cell.type
 				when Table.WALL then return yes
 				when Table.STONE then return @setOnFire x, y, yes
 			cell = @get Table.LAYER.DELAYED, x, y
@@ -99,7 +101,7 @@ Table
 				@explosion x, y, cell.firePower
 
 		setOnFire: (x, y, stop) ->
-			@set Table.LAYER.BASE, x, y, Table.EMPTY
+			@set Table.LAYER.BASE, x, y, type: Table.EMPTY
 			@set Table.LAYER.DELAYED, x, y,
 				type: Table.FIRE,
 				at: Date.now() + Table.FIRE_TIME - 1

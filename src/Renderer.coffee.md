@@ -23,6 +23,14 @@ Renderer
 				'B': @getMaterial 0xffffff, 'res/lavatile.jpg'
 				'F': @getMaterial 0xffffff, 'res/fire-jpg_256.jpg'
 
+			@geometries =
+				'X': new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
+				'S': new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
+				'F': new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
+				'1': new THREE.SphereGeometry @tileSize/2-2
+				'2': new THREE.SphereGeometry @tileSize/2-2
+				'B': new THREE.SphereGeometry @tileSize/2-4
+
 			@scene = new THREE.Scene()
 			@scene.add new THREE.AmbientLight new THREE.Color 0xffffff
 
@@ -30,13 +38,11 @@ Renderer
 			@base = new THREE.Mesh geometry, @materials['_']
 			@scene.add @base
 
-			@scene.add @walls = new THREE.Object3D()
-			@scene.add @players = new THREE.Object3D()
-			@scene.add @bombs = new THREE.Object3D()
-			@scene.add @fires = new THREE.Object3D()
+			@scene.add @entities = new THREE.Object3D()
 
 			@on 'update', => @update()
 			@on 'render', => requestAnimationFrame => @render()
+			@on 'remove', (e) => @entities.remove @entities.getObjectById e
 
 		focus: () ->
 			@renderer.domElement.focus()
@@ -66,36 +72,24 @@ Renderer
 
 			return material
 
-		getEntity: (type, x, y) ->
-			return if type is Table.EMPTY
-			material = @materials[type]
-			geometry = switch type
-				when 'X','S','F' then new THREE.BoxGeometry @tileSize-2, @tileSize-2, @tileSize-2
-				when '1', '2' then new THREE.SphereGeometry @tileSize/2-2
-				when 'B' then new THREE.SphereGeometry @tileSize/2-4
-
-			entity = new THREE.Mesh geometry, material
-			entity.position.x = @tileSize * (-@table.w/2 + x) + @tileSize/2
-			entity.position.y = @tileSize * (@table.h/2 - y) - @tileSize/2
-			return entity
+		addMesh: (cell, x, y) ->
+			return if cell.type is Table.EMPTY
+			return if cell.meshId?
+			material = @materials[cell.type]
+			geometry = @geometries[cell.type]
+			mesh = new THREE.Mesh geometry, material
+			mesh.position.x = @tileSize * (-@table.w/2 + x) + @tileSize/2
+			mesh.position.y = @tileSize * (@table.h/2 - y) - @tileSize/2
+			@entities.add mesh
+			cell.meshId = mesh.id
 
 		update: ->
-			@walls.children = []
-			@players.children = []
-			@bombs.children = []
-			@fires.children = []
 			for y in [0...@table.h]
 				for x in [0...@table.w]
-					type = @table.get Table.LAYER.BASE, x, y
-					entity = @getEntity type, x, y
-					switch type
-						when 'X', 'S' then @walls.add entity
-						when '1', '2' then @players.add entity
-					type = @table.get(Table.LAYER.DELAYED, x, y).type
-					entity = @getEntity type, x, y
-					switch type
-						when 'B' then @bombs.add entity
-						when 'F' then @fires.add entity
+					cell = @table.get Table.LAYER.BASE, x, y
+					@addMesh cell, x, y
+					cell = @table.get Table.LAYER.DELAYED, x, y
+					@addMesh cell, x, y
 			@emit 'render'
 
 		render: ->

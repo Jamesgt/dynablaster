@@ -21,7 +21,7 @@ Game base class
 			@table = new Table @w, @h
 
 			@renderer = new Renderer @parentId, @table
-			@table.pass 'update', @renderer
+			@table.pass 'update remove', @renderer
 
 			@keyboard = new Keyboard ['left', 'up', 'right', 'down', 'action'],
 				'1': [37, 38, 39, 40, 13] # left, up, right, down, enter

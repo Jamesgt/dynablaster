@@ -8,8 +8,8 @@ Game base class
 
 	class exports.Game extends PassEventEmitter
 
-		w: 13
-		h: 13
+		w: 15
+		h: 15
 
 		players: {}
 
@@ -32,8 +32,8 @@ Game base class
 			PassEventEmitter.pass Player, 'clear set move update bomb', @table
 
 			@players =
-				'1': new Player '1', @w-1, @h-1
-				'2': new Player '2', 0, 0
+				'1': new Player '1', @w-2, @h-2
+				'2': new Player '2', 1, 1
 
 			@keyboard.pass @players
 
@@ -45,5 +45,5 @@ Game base class
 		reset: () ->
 			@table.clearAll()
 			@table.standard()
-			@players['1'].reset @w-1, @h-1
-			@players['2'].reset 0, 0
+			@players['1'].reset @w-2, @h-2
+			@players['2'].reset 1, 1

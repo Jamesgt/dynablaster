@@ -23,9 +23,9 @@ Renderer
 				'F': @getMaterial 0xffffff, 'res/fire-jpg_256.jpg'
 
 			@geometries =
-				'X': new THREE.BoxGeometry Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2
-				'S': new THREE.BoxGeometry Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2
-				'F': new THREE.BoxGeometry Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2, Constants.TILE_SIZE - 2
+				'X': new THREE.BoxGeometry Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE
+				'S': new THREE.BoxGeometry Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE
+				'F': new THREE.BoxGeometry Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE
 				'1': new THREE.SphereGeometry Constants.TILE_SIZE /2 - 2
 				'2': new THREE.SphereGeometry Constants.TILE_SIZE /2 - 2
 				'B': new THREE.SphereGeometry Constants.TILE_SIZE /2 - 4
@@ -55,8 +55,8 @@ Renderer
 			h = window.innerHeight
 			@renderer.setSize w, h
 			@camera = new THREE.PerspectiveCamera 50, w / h, 1, 5000
-			@camera.position.z = 750
-			@camera.rotation.x = 2*Math.PI
+			@camera.position.z = 875
+			@camera.rotation.x = 2 * Math.PI
 			@emit 'render'
 
 		getMaterial: (color, url, repeat = no) ->
@@ -88,6 +88,8 @@ Renderer
 			mesh.position.x = Constants.TILE_SIZE * ( 0.5 + -@w / 2 + cell.x) + Constants.SUB_MOVE_RATE * (cell.subX ? 0)
 			mesh.position.y = Constants.TILE_SIZE * (-0.5 +  @h / 2 - cell.y) - Constants.SUB_MOVE_RATE * (cell.subY ? 0)
 			mesh.position.z = Constants.TILE_SIZE * 0.5
-
+			unless isNaN parseInt cell.type # player
+				mesh.rotation.y = -2 * Math.PI * (cell.subX + Constants.SUB_LIMIT - 1) / Constants.SUB_ROTATE_RATE
+				mesh.rotation.x =  2 * Math.PI * (cell.subY + Constants.SUB_LIMIT - 1) / Constants.SUB_ROTATE_RATE
 		render: ->
 			@renderer.render @scene, @camera

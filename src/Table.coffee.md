@@ -23,7 +23,7 @@ Table
 		constructor: (@w, @h) ->
 			@clearAll()
 
-			@on 'clear', (e) => @clear Table.LAYER.BASE, e.x, e.y
+			@on 'clear', (e) => @clear Table.LAYER.BASE, e.x, e.y, no
 			@on 'set', (e) => @set Table.LAYER.BASE, e.x, e.y, e.v
 			@on 'move', (e) => @move e.x, e.y, e.v
 			@on 'bomb', (e) => @placeBomb e.x, e.y, e.firePower
@@ -37,16 +37,19 @@ Table
 			]
 			@emit 'removeAll'
 
-		clear: (layer, x, y) ->
-			@set layer, x, y, type: Table.EMPTY
+		clear: (layer, x, y, wall=yes) ->
+			@set layer, x, y, type: Table.EMPTY if wall or @get(layer, x, y).type isnt Table.WALL
 
 		standard: ->
 			# walls
-			@set 0, x, y, {type: Table.WALL, x, y} for y in [1...@h] by 2 for x in [1...@w] by 2
+			@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y} for y in [2...@h-1] by 2 for x in [2...@w-1] by 2
+			for y in [0...@h]
+				for x in [0...@w] when x is 0 or x is @w-1 or y is 0 or y is @h-1
+					@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y}
 			# random stone blocks
 			for y in [0...@h]
 				for x in [0...@w] when @get(Table.LAYER.BASE, x, y).type is Table.EMPTY
-					@set 0, x, y, {type: Table.STONE, x, y} if Math.random() > 0.5
+					@set Table.LAYER.BASE, x, y, {type: Table.STONE, x, y} if Math.random() > 0.5
 
 			@emit 'render'
 

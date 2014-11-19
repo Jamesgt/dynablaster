@@ -21,6 +21,7 @@ Keyboard
 			@emitEvery 'tick', @INTERVAL
 
 		tick: () ->
+			window.stats.begin()
 			toSend = {}
 			for own key, pressed of @status when pressed
 				entry = @keys[key]
@@ -28,6 +29,7 @@ Keyboard
 				toSend[entry.id][entry.group] ?= []
 				toSend[entry.id][entry.group].push entry.event
 			@emit key, group.join '-' for group in groups when group for key, groups of toSend
+			window.stats.end()
 
 		key: (key, down) ->
 			return unless @keys[key]? # skip if key is not watched

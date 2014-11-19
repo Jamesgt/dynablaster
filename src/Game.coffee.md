@@ -17,11 +17,16 @@ Game base class
 			$('#reset').click =>
 				@reset()
 				@renderer.focus()
+			window.stats = new Stats()
+			window.stats.setMode 1
+			window.stats.domElement.style.position = 'absolute'
+			window.stats.domElement.style.bottom = '0px'
+			$("#controls").append window.stats.domElement
 
 			@table = new Table @w, @h
 
 			@renderer = new Renderer @parentId, @w, @h
-			@table.pass 'render remove removeAll add setPosition', @renderer
+			@table.pass 'render remove removeAll add setPosition addLight setLight', @renderer
 
 			@keyboard = new Keyboard [['left', 'up', 'right', 'down'], ['action']],
 				'1': [[37, 38, 39, 40], [13]] # left, up, right, down and enter

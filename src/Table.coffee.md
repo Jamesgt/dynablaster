@@ -41,11 +41,14 @@ Table
 			@set layer, x, y, type: Table.EMPTY if wall or @get(layer, x, y).type isnt Table.WALL
 
 		standard: ->
-			# walls
+			# walls and possible fire lights
 			@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y} for y in [2...@h-1] by 2 for x in [2...@w-1] by 2
 			for y in [0...@h]
-				for x in [0...@w] when x is 0 or x is @w-1 or y is 0 or y is @h-1
-					@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y}
+				for x in [0...@w]
+					if x is 0 or x is @w-1 or y is 0 or y is @h-1
+						@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y}
+					else
+						@emit 'addLight', {x, y}
 			# random stone blocks
 			for y in [0...@h]
 				for x in [0...@w] when @get(Table.LAYER.BASE, x, y).type is Table.EMPTY
@@ -190,6 +193,7 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 					when 'F'
 						needsUpdate = true
 						@clear Table.LAYER.DELAYED, item.x, item.y
+						@emit 'setLight', {x: item.x, y: item.y, v: 0}
 			@emit 'render' if needsUpdate
 
 		explosion: (x, y, firePower) ->
@@ -215,6 +219,7 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 
 		setOnFire: (x, y, stop) ->
 			@clear Table.LAYER.BASE, x, y
+			@emit 'setLight', {x, y, v: 1}
 			@set Table.LAYER.DELAYED, x, y,
 				x: x
 				y: y

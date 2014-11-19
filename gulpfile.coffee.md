@@ -60,6 +60,7 @@ Build file.
 		gulp.src [
 			'./bower_components/jquery/dist/jquery.min.js'
 			'./bower_components/threejs/build/three.min.js'
+			'./bower_components/stats.js/build/stats.min.js'
 		]
 		.pipe gulp.dest './dist/libs'
 

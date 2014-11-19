@@ -78,11 +78,12 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 
 **TODO**: remove debug comments and extra param of @emitMove.
 
+		debug: no
+
 		move: (x=0, y=0, v) ->
-			# --- debug ---
-			# console.log '------------------------------------------------------------------------------------'
-			# console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'start'
-			# --- debug ---
+			if @debug
+				console.log '------------------------------------------------------------------------------------'
+				console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'start'
 			# 1. toward center
 			towardCenter = Math.abs(v.subX + x) <= Math.abs(v.subX) and Math.abs(v.subY + y) <= Math.abs(v.subY)
 			return @emitMove v, x, y, 'tC' if towardCenter
@@ -93,31 +94,27 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 				yempty = @canPlayerMoveTo v.x, v.y + y
 				xredirectEmpty = @canPlayerMoveTo v.x + Math.sign(v.subX + x), v.y
 				yredirectEmpty = @canPlayerMoveTo v.x, v.y + Math.sign(v.subY + y)
-				# --- debug ---
-				# console.log 'table.move', 'xe', xempty, 'xRe', xredirectEmpty, 'ye', yempty, 'yRe', yredirectEmpty
-				# --- debug ---
+				if @debug
+					console.log 'table.move', 'xe', xempty, 'xRe', xredirectEmpty, 'ye', yempty, 'yRe', yredirectEmpty
 				if xempty or xredirectEmpty
 					y = 0
 				else if yempty or yredirectEmpty
 					x = 0
-				# --- debug ---
-				# console.log 'table.move', 'simplify', {x, y}
-				# --- debug ---
-				return if x isnt 0 and y isnt 0 # FIXME: ???????????????????????
+				if @debug
+					console.log 'table.move', 'simplify', {x, y}
+				return if x isnt 0 and y isnt 0 # dead end
 			# 3. toward center again
 			towardCenter = Math.abs(v.subX + x) <= Math.abs(v.subX) and Math.abs(v.subY + y) <= Math.abs(v.subY)
 			return @emitMove v, x, y, 'tC2' if towardCenter
 			# 4. skip if it is a dead-end
 			empty = @canPlayerMoveTo v.x + x, v.y + y
-			redirectEmpty = @canPlayerMoveTo v.x + Math.sign(v.subX + x), v.y + Math.sign(v.subY + y)
 			return unless empty or redirectEmpty # nowhere to go
-			# --- debug ---
-			# console.log 'table.move',
-			# 	'T', JSON.stringify({x: v.x + x, y: v.y + y}), 'E', empty
-			# 	'T R', JSON.stringify({x: v.x + Math.sign(v.subX + x), y: v.y + Math.sign(v.subY + y)}), redirectEmpty
-			# 	'S', JSON.stringify({x: v.subX, y: v.subY})
-			# old = {x, y}
-			# --- debug ---
+			if @debug
+				console.log 'table.move',
+					'T', JSON.stringify({x: v.x + x, y: v.y + y}), 'E', empty
+					'T R', JSON.stringify({x: v.x + Math.sign(v.subX + x), y: v.y + Math.sign(v.subY + y)}), redirectEmpty
+					'S', JSON.stringify({x: v.subX, y: v.subY})
+				old = {x, y}
 			# 5. redirect near to corner
 			{x, y} = switch
 				when not empty then switch
@@ -127,9 +124,9 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 					when x is 0 and v.subX isnt 0 and empty then {x: -Math.sign(v.subX), y: 0}
 					when y is 0 and v.subY isnt 0 and empty then {x: 0, y: -Math.sign(v.subY)}
 					else {x, y}
-			# --- debug ---
-			# console.log 'table.move', 'redirect', old, '->', {x, y} if old.x isnt x or old.y isnt y
-			# --- debug ---
+			if @debug
+				console.log 'table.move', 'redirect', old, '->', {x, y} if old.x isnt x or old.y isnt y
+			redirectEmpty = @canPlayerMoveTo v.x + Math.sign(v.subX + x), v.y + Math.sign(v.subY + y)
 			# 6. same cell
 			limit = Constants.SUB_LIMIT
 			sameCell = -limit < v.subX + x <= limit and -limit < v.subY + y <= limit
@@ -145,9 +142,8 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 			if x? and y?
 				v.subX += x
 				v.subY += y
-			# --- debug ---
-			# console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'end', debug
-			# --- debug ---
+			if @debug
+				console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'end', debug
 			@emit 'setPosition', v
 			@emit 'render'
 

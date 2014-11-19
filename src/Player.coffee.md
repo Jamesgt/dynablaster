@@ -20,9 +20,13 @@ Player
 			@on 'up', => @emit 'move', v: @, y: UP
 			@on 'down', => @emit 'move', v: @, y: DOWN
 			@on 'left-up', => @emit 'move', v: @, x: LEFT, y: UP
+			@on 'up-left', => @emit 'move', v: @, x: LEFT, y: UP
 			@on 'up-right', => @emit 'move', v: @, x: RIGHT, y: UP
+			@on 'right-up', => @emit 'move', v: @, x: RIGHT, y: UP
 			@on 'right-down', => @emit 'move', v: @, x: RIGHT, y: DOWN
+			@on 'down-right', => @emit 'move', v: @, x: RIGHT, y: DOWN
 			@on 'left-down', => @emit 'move', v: @, x: LEFT, y: DOWN
+			@on 'down-left', => @emit 'move', v: @, x: LEFT, y: DOWN
 			@on 'animate', => @animate()
 			@on 'action', => @emit 'bomb', {@x, @y, @firePower}
 

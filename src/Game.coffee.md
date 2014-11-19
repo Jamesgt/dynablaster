@@ -21,11 +21,11 @@ Game base class
 			@table = new Table @w, @h
 
 			@renderer = new Renderer @parentId, @w, @h
-			@table.pass 'render remove removeAll add', @renderer
+			@table.pass 'render remove removeAll add setPosition', @renderer
 
-			@keyboard = new Keyboard ['left', 'up', 'right', 'down', 'action'],
-				'1': [37, 38, 39, 40, 13] # left, up, right, down, enter
-				'2': [65, 87, 68, 83, 32] # a, w, d, s, space
+			@keyboard = new Keyboard [['left', 'up', 'right', 'down'], ['action']],
+				'1': [[37, 38, 39, 40], [13]] # left, up, right, down and enter
+				'2': [[65, 87, 68, 83], [32]] # a, w, d, s and space
 
 			@table.standard()
 
@@ -45,5 +45,5 @@ Game base class
 		reset: () ->
 			@table.clearAll()
 			@table.standard()
-			@players['1'].place @w-1, @h-1
-			@players['2'].place 0, 0
+			@players['1'].reset @w-1, @h-1
+			@players['2'].reset 0, 0

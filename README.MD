@@ -15,11 +15,10 @@ Plans:
   - 5 player
   - p (webrtc)
 - Resources (http://texturelib.com/)
-    - player animation
-    - bomb animation
+- Tweens
 - Level generator
     - hidden powerups
-    - monsters
+- Monsters
 - Scoring
 - Campaign
 - Sounds

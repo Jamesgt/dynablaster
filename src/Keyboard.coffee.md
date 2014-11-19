@@ -4,29 +4,32 @@ Keyboard
 
 	class exports.Keyboard extends PassEventEmitter
 
-		INTERVAL: 250
+		INTERVAL: 40
 
 		status: {}
 		keys: {}
 
 		constructor: (@events, @watchedKeys) ->
-			@keys[key] = id: id, event: @events[i] for key, i in keys for id, keys of @watchedKeys
+			@keys[key] = {group, id, event: @events[group][i]} for key, i in keys for keys, group in keyGroups for id, keyGroups of @watchedKeys
 
 			$('body').keydown (e) => @key e.keyCode, yes
 			$('body').keyup (e) => @key e.keyCode, no
 
 			@on 'trigger', (e) => @trigger e
+			@on 'tick', => @tick()
+
+			@emitEvery 'tick', @INTERVAL
+
+		tick: () ->
+			toSend = {}
+			for own key, pressed of @status when pressed
+				entry = @keys[key]
+				toSend[entry.id] ?= []
+				toSend[entry.id][entry.group] ?= []
+				toSend[entry.id][entry.group].push entry.event
+			@emit key, group.join '-' for group in groups when group for key, groups of toSend
 
 		key: (key, down) ->
 			return unless @keys[key]? # skip if key is not watched
 
-			if down
-				unless @status[key]?
-					@trigger key
-					@status[key] = @emitEvery 'trigger', key, @INTERVAL
-			else
-				clearInterval @status[key]
-				delete @status[key]
-
-		trigger: (key) ->
-			@emit @keys[key].id, @keys[key].event
+			@status[key] = down

@@ -1,5 +1,6 @@
 Table
 
+	arrayShuffle = require 'array-shuffle'
 	{PassEventEmitter} = require 'pee'
 	{Constants} = require './Constants.coffee.md'
 
@@ -16,9 +17,13 @@ Table
 		@EMPTY: '.'
 		@WALL: 'X'
 		@STONE: 'S'
-		@POWER_UP: 'P'
 		@BOMB: 'B'
 		@FIRE: 'F'
+		@POWERUP_PREFIX: '+'
+
+		@POWERUP_COUNTS:
+			'B': 7
+			'F': 7
 
 		constructor: (@w, @h) ->
 			@clearAll()
@@ -26,7 +31,7 @@ Table
 			@on 'clear', (e) => @clear Table.LAYER.BASE, e.x, e.y, no
 			@on 'set', (e) => @set Table.LAYER.BASE, e.x, e.y, e.v
 			@on 'move', (e) => @move e.x, e.y, e.v
-			@on 'bomb', (e) => @placeBomb e.x, e.y, e.firePower
+			@on 'bomb', (e) => @placeBomb e.x, e.y, e.firePower, e.type
 
 			@on 'tick', => @tick()
 
@@ -40,7 +45,7 @@ Table
 		clear: (layer, x, y, wall=yes) ->
 			@set layer, x, y, type: Table.EMPTY if wall or @get(layer, x, y).type isnt Table.WALL
 
-		standard: ->
+		standard: () ->
 			# walls and possible fire lights
 			@set Table.LAYER.BASE, x, y, {type: Table.WALL, x, y} for y in [2...@h-1] by 2 for x in [2...@w-1] by 2
 			for y in [0...@h]
@@ -51,10 +56,19 @@ Table
 						@emit 'addLight', {x, y}
 			# random stone blocks
 			for y in [0...@h]
-				for x in [0...@w] when @get(Table.LAYER.BASE, x, y).type is Table.EMPTY
-					@set Table.LAYER.BASE, x, y, {type: Table.STONE, x, y} if Math.random() > 0.5
+				for x in [0...@w] when @get(Table.LAYER.BASE, x, y).type is Table.EMPTY and Math.random() > 0.5
+					@set Table.LAYER.BASE, x, y, {type: Table.STONE, x, y}
 
-			@emit 'render'
+		standardPowerups: () ->
+			stoneCells = []
+			for y in [0...@h]
+				for x in [0...@w]
+					cell = @get Table.LAYER.BASE, x, y
+					stoneCells.push cell if cell.type is Table.STONE
+			stoneCells = arrayShuffle stoneCells
+			for type, count of Table.POWERUP_COUNTS
+				for [0...count]
+					stoneCells.pop().powerup = {type: Table.POWERUP_PREFIX + type}
 
 		set: (layer, x, y, v) ->
 			return unless 0 <= x < @w and 0 <= y < @h
@@ -82,17 +96,12 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 6. same cell, so only sub-values has to be changed
 7. main cell changed, also flip the sub values
 
-**TODO**: remove debug comments and extra param of @emitMove.
-
-		debug: no
+Sub cordinates represent the player position inside the cell.
 
 		move: (x=0, y=0, v) ->
-			if @debug
-				console.log '------------------------------------------------------------------------------------'
-				console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'start'
 			# 1. toward center
 			towardCenter = Math.abs(v.subX + x) <= Math.abs(v.subX) and Math.abs(v.subY + y) <= Math.abs(v.subY)
-			return @emitMove v, x, y, 'tC' if towardCenter
+			return @emitMove v, x, y if towardCenter
 			# 2. simplify double move
 			if x isnt 0 and y isnt 0
 				orig = {x, y}
@@ -100,27 +109,17 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 				yempty = @canPlayerMoveTo v.x, v.y + y
 				xredirectEmpty = @canPlayerMoveTo v.x + Math.sign(v.subX + x), v.y
 				yredirectEmpty = @canPlayerMoveTo v.x, v.y + Math.sign(v.subY + y)
-				if @debug
-					console.log 'table.move', 'xe', xempty, 'xRe', xredirectEmpty, 'ye', yempty, 'yRe', yredirectEmpty
 				if xempty or xredirectEmpty
 					y = 0
 				else if yempty or yredirectEmpty
 					x = 0
-				if @debug
-					console.log 'table.move', 'simplify', {x, y}
 				return if x isnt 0 and y isnt 0 # dead end
 			# 3. toward center again
 			towardCenter = Math.abs(v.subX + x) <= Math.abs(v.subX) and Math.abs(v.subY + y) <= Math.abs(v.subY)
-			return @emitMove v, x, y, 'tC2' if towardCenter
+			return @emitMove v, x, y if towardCenter
 			# 4. skip if it is a dead-end
 			empty = @canPlayerMoveTo v.x + x, v.y + y
 			return unless empty or redirectEmpty # nowhere to go
-			if @debug
-				console.log 'table.move',
-					'T', JSON.stringify({x: v.x + x, y: v.y + y}), 'E', empty
-					'T R', JSON.stringify({x: v.x + Math.sign(v.subX + x), y: v.y + Math.sign(v.subY + y)}), redirectEmpty
-					'S', JSON.stringify({x: v.subX, y: v.subY})
-				old = {x, y}
 			# 5. redirect near to corner
 			{x, y} = switch
 				when not empty then switch
@@ -130,26 +129,27 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 					when x is 0 and v.subX isnt 0 and empty then {x: -Math.sign(v.subX), y: 0}
 					when y is 0 and v.subY isnt 0 and empty then {x: 0, y: -Math.sign(v.subY)}
 					else {x, y}
-			if @debug
-				console.log 'table.move', 'redirect', old, '->', {x, y} if old.x isnt x or old.y isnt y
 			redirectEmpty = @canPlayerMoveTo v.x + Math.sign(v.subX + x), v.y + Math.sign(v.subY + y)
 			# 6. same cell
 			limit = Constants.SUB_LIMIT
 			sameCell = -limit < v.subX + x <= limit and -limit < v.subY + y <= limit
-			return @emitMove v, x, y, 'sC' if sameCell
+			return @emitMove v, x, y if sameCell
 			# 7. cell changed
+			@clear Table.LAYER.BASE, v.x, v.y
 			v.x += x
 			v.y += y
 			v.subX = @flipSub v.subX + x
 			v.subY = @flipSub v.subY + y
+			newCell = @get(Table.LAYER.BASE, v.x, v.y)
+			v.emit 'cellChanged', newCell
+			@emit 'setLight', {x: v.x, y: v.y, v: 0, type: newCell.type} if newCell.type[0] is Table.POWERUP_PREFIX
+			@set Table.LAYER.BASE, v.x, v.y, v
 			@emitMove v
 
-		emitMove: (v, x, y, debug) ->
+		emitMove: (v, x, y) ->
 			if x? and y?
 				v.subX += x
 				v.subY += y
-			if @debug
-				console.log 'table.move', {x, y}, {x: v.x, y: v.y}, {x: v.subX, y: v.subY}, 'end', debug
 			@emit 'setPosition', v
 			@emit 'render'
 
@@ -159,19 +159,21 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 		    	when  Constants.SUB_LIMIT + 1 then -Constants.SUB_LIMIT + 1
 		    	else n
 
-		placeBomb: (x, y, firePower) ->
-			cell = @get Table.LAYER.DELAYED, x, y
+		placeBomb: (x, y, firePower, owner) ->
 			delay = Table.EXPLOSION_TIME
-			switch cell.type
+			switch @get(Table.LAYER.DELAYED, x, y).type
 				when Table.BOMB then return
 				when Table.FIRE then delay = 0 # bomb on fire, immediate explosion
 
+			@emit owner, 'bombPlaced'
+
 			@set Table.LAYER.DELAYED, x, y,
+				type: Table.BOMB
 				x: x
 				y: y
-				type: Table.BOMB
 				firePower: firePower
 				at: Date.now() + delay - 1
+				owner: owner
 			@emit 'render'
 			@emitLater 'tick', delay
 
@@ -188,41 +190,50 @@ This monster needs some doc. For smooth movement the vector is redirected if it 
 				switch item.cell.type
 					when 'B'
 						needsUpdate = true
-						@explosion item.x, item.y, item.cell.firePower
+						@explosion item.cell
 						@emitLater 'tick', Table.FIRE_TIME
 					when 'F'
 						needsUpdate = true
 						@clear Table.LAYER.DELAYED, item.x, item.y
-						@emit 'setLight', {x: item.x, y: item.y, v: 0}
+						if item.cell.powerup?
+							item.cell.powerup.x = item.x
+							item.cell.powerup.y = item.y
+							@set Table.LAYER.BASE, item.x, item.y, item.cell.powerup
+							@emit 'setLight', {x: item.x, y: item.y, v: 1, type: item.cell.powerup.type}
+						else
+							@emit 'setLight', {x: item.x, y: item.y, v: 0, type: Table.FIRE}
 			@emit 'render' if needsUpdate
 
-		explosion: (x, y, firePower) ->
-			@clear Table.LAYER.DELAYED, x, y # remove the bomb
-			@fire x, y
-			for diff in [1..firePower] then break if @fire x-diff, y
-			for diff in [1..firePower] then break if @fire x, y-diff
-			for diff in [1..firePower] then break if @fire x+diff, y
-			for diff in [1..firePower] then break if @fire x, y+diff
+		explosion: (cell) ->
+			@emit cell.owner, 'explosion'
+			@clear Table.LAYER.DELAYED, cell.x, cell.y # remove the bomb
+			@fire cell.x, cell.y
+			for diff in [1..cell.firePower] then break if @fire cell.x-diff, cell.y
+			for diff in [1..cell.firePower] then break if @fire cell.x,      cell.y-diff
+			for diff in [1..cell.firePower] then break if @fire cell.x+diff, cell.y
+			for diff in [1..cell.firePower] then break if @fire cell.x,      cell.y+diff
 
 		# returns true if fire is stopped by obstacle or edge
 		fire: (x, y) ->
 			cell = @get Table.LAYER.BASE, x, y
 			return yes if cell.type is Table.OUT # edge
-			@emit 'death', cell.type unless isNaN parseInt cell.type # player
+			cell.emit 'cellChanged', {type: Table.FIRE} unless isNaN parseInt cell.type # player
 			switch cell.type
 				when Table.WALL then return yes
 				when Table.STONE then return @setOnFire x, y, yes
 			cell = @get Table.LAYER.DELAYED, x, y
 			@setOnFire x, y
 			if cell.type is Table.BOMB # chain reaction
-				@explosion x, y, cell.firePower
+				@explosion cell
 
 		setOnFire: (x, y, stop) ->
+			{powerup} = @get(Table.LAYER.BASE, x, y)
 			@clear Table.LAYER.BASE, x, y
-			@emit 'setLight', {x, y, v: 1}
+			@emit 'setLight', {x, y, v: 1, type: Table.FIRE}
 			@set Table.LAYER.DELAYED, x, y,
+				type: Table.FIRE
 				x: x
 				y: y
-				type: Table.FIRE,
+				powerup: powerup
 				at: Date.now() + Table.FIRE_TIME - 1
 			return stop

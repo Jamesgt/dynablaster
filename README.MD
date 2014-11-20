@@ -16,8 +16,6 @@ Plans:
   - p (webrtc)
 - Resources (http://texturelib.com/)
 - Tweens
-- Level generator
-    - hidden powerups
 - Monsters
 - Scoring
 - Campaign

@@ -40,9 +40,12 @@ Game base class
 				'1': new Player '1', @w-2, @h-2
 				'2': new Player '2', 1, 1
 
-			@keyboard.pass @players
+			@table.standardPowerups()
 
-			@table.on 'death', (id) =>
+			@keyboard.pass @players
+			@table.pass @players
+
+			PassEventEmitter.getGlobal().on 'death', (id) =>
 				console.log 'death', id
 
 			@renderer.emit 'render'

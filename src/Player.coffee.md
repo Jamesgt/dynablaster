@@ -25,12 +25,27 @@ Player
 			addDelegate 'up-right right-up',     x: RIGHT, y: UP
 			addDelegate 'right-down down-right', x: RIGHT, y: DOWN
 			addDelegate 'left-down down-left',   x: LEFT,  y: DOWN
-			@on 'action', => @emit 'bomb', {@x, @y, @firePower}
+
+			@on 'action', =>
+				return unless @bombs < @maxBombs
+				@emit 'bomb', {@x, @y, @firePower, @type}
+
+			@on 'bombPlaced', => @bombs++
+			@on 'explosion', => @bombs--
+
+			@on 'cellChanged', (e) =>
+				switch e.type
+					when 'F' then Player.getGlobal().emit 'death', @type
+					when '+F' then @firePower++
+					when '+B' then @maxBombs++
 
 			@reset @x, @y
 
 		reset: (@x, @y) ->
-			@firePower = 2
+			@firePower = 1
+			@maxBombs = 1
+			@bombs = 0
+
 			@subX = 0
 			@subY = 0
 			delete @meshId

@@ -14,13 +14,17 @@ Renderer
 			$(window).bind 'resize', => @fillWindow()
 
 			@materials =
-				'_': @getMaterial 0xffffff, 'res/tile_tile_0022_01_thumb_256.jpg', yes
-				'X': @getMaterial 0x999999, 'res/brick_stone_wall_0113_01_preview.jpg'
-				'S': @getMaterial 0xffffff, 'res/brick_stone_wall_0113_01_preview.jpg'
-				'1': @getMaterial 0xff9999, 'res/disturb.jpg'
-				'2': @getMaterial 0x99ff99, 'res/disturb.jpg'
-				'B': @getMaterial 0xffffff, 'res/lavatile.jpg'
-				'F': @getMaterial 0xffffff, 'res/fire-jpg_256.jpg'
+				'_':  @getMaterial 0xffffff, 'res/tile_tile_0022_01_thumb_256.jpg', yes
+				'X':  @getMaterial 0x999999, 'res/brick_stone_wall_0113_01_preview.jpg'
+				'S':  @getMaterial 0xffffff, 'res/brick_stone_wall_0113_01_preview.jpg'
+				'1':  @getMaterial 0xff9999, 'res/disturb.jpg'
+				'2':  @getMaterial 0x99ff99, 'res/disturb.jpg'
+				'B':  @getMaterial 0xffffff, 'res/lavatile.jpg'
+				'F':  @getMaterial 0xffffff, 'res/fire-jpg_256.jpg'
+				'+B': @getMaterial 0x2244ff, 'res/fire-jpg_256.jpg'
+				'+F': @getMaterial 0x2244ff, 'res/fire-jpg_256.jpg'
+			@materials['F'].transparent = yes
+			@materials['F'].opacity = 0.70
 
 			@geometries =
 				'X': new THREE.BoxGeometry Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE
@@ -29,6 +33,13 @@ Renderer
 				'1': new THREE.SphereGeometry Constants.TILE_SIZE / 2 - 2
 				'2': new THREE.SphereGeometry Constants.TILE_SIZE / 2 - 2
 				'B': new THREE.SphereGeometry Constants.TILE_SIZE / 2 - 4
+				'+B': new THREE.SphereGeometry Constants.TILE_SIZE / 2 - 4
+				'+F': new THREE.BoxGeometry 0.7 * Constants.TILE_SIZE, 0.7 * Constants.TILE_SIZE, 0.7 * Constants.TILE_SIZE
+
+			@lightParams =
+				'F':  color: 0xff4444, distance: 3 * Constants.TILE_SIZE
+				'+B': color: 0x6666ff, distance: 3 * Constants.TILE_SIZE
+				'+F': color: 0x6666ff, distance: 3 * Constants.TILE_SIZE
 
 			@scene = new THREE.Scene()
 			@scene.add new THREE.AmbientLight new THREE.Color 0xffffff
@@ -42,13 +53,15 @@ Renderer
 
 			@on 'render', => requestAnimationFrame => @render()
 			@on 'addLight', (e) =>
-				@lights.add light = new THREE.PointLight 0xff4444, 0, 3 * Constants.TILE_SIZE
+				@lights.add light = new THREE.PointLight 0xffffff, 0, 3 * Constants.TILE_SIZE
 				p = @toRenderCoords e
 				light.position.set p.x, p.y, p.z + 2 * Constants.TILE_SIZE
 				light.name = e.y + ',' + e.x
 			@on 'setLight', (e) =>
 				light = @lights.getObjectByName e.y + ',' + e.x
 				light.intensity = e.v
+				light.color = new THREE.Color @lightParams[e.type].color
+				light.distance = @lightParams[e.type].distance
 			@on 'remove', (e) => @entities.remove @entities.getObjectById e
 			@on 'removeAll', =>
 				while @entities.children.length > 0

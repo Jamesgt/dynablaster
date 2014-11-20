@@ -44,6 +44,10 @@ y\x| 1  | 2 | 3 | 4     | 5 | 6     | 7  | 8
 
 If later a minimal delay will be introduced for the expansion of fire then it will give answer yes to the question, but in the original game... I do not remember.
 
+##### If a stone is blown up then its cell should be set on fire or not?
+
+Currently it is set on fire.
+
 ## License
 
 MIT

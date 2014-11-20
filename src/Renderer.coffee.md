@@ -41,16 +41,6 @@ Renderer
 				'+B': color: 0x6666ff, distance: 3 * Constants.TILE_SIZE
 				'+F': color: 0x6666ff, distance: 3 * Constants.TILE_SIZE
 
-			@scene = new THREE.Scene()
-			@scene.add new THREE.AmbientLight new THREE.Color 0xffffff
-
-			geometry = new THREE.PlaneBufferGeometry @w * Constants.TILE_SIZE, @h * Constants.TILE_SIZE, 1, 1
-			@base = new THREE.Mesh geometry, @materials['_']
-			@scene.add @base
-
-			@scene.add @lights = new THREE.Object3D()
-			@scene.add @entities = new THREE.Object3D()
-
 			@on 'render', => requestAnimationFrame => @render()
 			@on 'addLight', (e) =>
 				@lights.add light = new THREE.PointLight 0xffffff, 0, 3 * Constants.TILE_SIZE
@@ -68,6 +58,19 @@ Renderer
 					@entities.remove @entities.children[0]
 			@on 'add', (e) => @addMesh e
 			@on 'setPosition', (e) => @setMeshPosition e
+
+			@reset()
+
+		reset: () ->
+			@scene = new THREE.Scene()
+			@scene.add new THREE.AmbientLight new THREE.Color 0xffffff
+
+			geometry = new THREE.PlaneBufferGeometry @w * Constants.TILE_SIZE, @h * Constants.TILE_SIZE, 1, 1
+			@base = new THREE.Mesh geometry, @materials['_']
+			@scene.add @base
+
+			@scene.add @lights = new THREE.Object3D()
+			@scene.add @entities = new THREE.Object3D()
 
 		focus: () ->
 			@renderer.domElement.focus()

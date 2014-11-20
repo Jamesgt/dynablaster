@@ -55,3 +55,4 @@ Game base class
 			@table.standard()
 			@players['1'].reset @w-2, @h-2
 			@players['2'].reset 1, 1
+			@renderer.emit 'render'

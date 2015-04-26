@@ -28,7 +28,7 @@ Keyboard
 				toSend[entry.id] ?= []
 				toSend[entry.id][entry.group] ?= []
 				toSend[entry.id][entry.group].push entry.event
-			@emit key, group.join '-' for group in groups when group for key, groups of toSend
+			@emit id, group.join '-' for group in groups when group for id, groups of toSend
 			window.stats.end()
 
 		key: (key, down) ->

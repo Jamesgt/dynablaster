@@ -3,6 +3,7 @@ Build file.
 	gulp = require 'gulp'
 	jade = require 'gulp-jade'
 	stylus = require 'gulp-stylus'
+	nib = require 'nib'
 	coffee = require 'gulp-coffee'
 	livereload = require 'gulp-livereload'
 	concat = require 'gulp-concat'
@@ -11,7 +12,7 @@ Build file.
 	uglify = require 'gulp-uglify'
 
 	gulp.task 'default', ['watch', 'all', 'devServer']
-	gulp.task 'all', ['jade', 'stylus', 'coffee', 'copy']
+	gulp.task 'all', ['jade', 'stylus', 'coffee']
 
 	gulp.task 'watch', ->
 		livereload.listen()
@@ -31,38 +32,33 @@ Build file.
 		@app = express()
 		@app.use logger 'dev'
 		@app.use express.static './dist'
+		@app.use '/res', express.static './res'
 		@app.listen 12345
 		console.log "Web server listens on 12345."
 
-	simpleTask = (extension, middleware) ->
-		gulp.src './src/*.' + extension
-		.pipe middleware
+	addErrorHandler = (name, middleware) ->
+		middleware.on 'error', (e) ->
+			console.log "--- #{name} ERROR ----------------------"
+			console.log e.name, ':', e.message
+			console.log '----------------------------------------'
+		# return middleware
+
+	gulp.task 'jade', ->
+		gulp.src './src/*.jade'
+		.pipe addErrorHandler 'Jade', jade locals: dev: yes
 		.pipe gulp.dest './dist'
 		.pipe livereload()
 
-	gulp.task 'jade'  , -> simpleTask 'jade', jade()
-	gulp.task 'stylus', -> simpleTask 'styl', stylus()
+	gulp.task 'stylus', ->
+		gulp.src './src/*.styl'
+		.pipe addErrorHandler 'Stylus', stylus use: nib()
+		.pipe gulp.dest './dist'
+		.pipe livereload()
 
 	gulp.task 'coffee', ->
-		middleware = browserify transform: ['coffeeify'], extensions: ['.coffee.md']
-		middleware.on 'error', (e) ->
-			console.log '--- COFFEE SCRIPT ERROR ----------------'
-			console.log e.name, ':', e.message
-			console.log '----------------------------------------'
 		gulp.src './src/entryPoint.coffee.md', read: no
-		.pipe middleware
+		.pipe addErrorHandler 'CoffeeScript', browserify transform: ['coffeeify'], extensions: ['.coffee.md']
 		.pipe rename 'game.js'
 		# .pipe uglify()
 		.pipe gulp.dest './dist'
 		.pipe livereload()
-
-	gulp.task 'copy', ->
-		gulp.src [
-			'./bower_components/jquery/dist/jquery.min.js'
-			'./bower_components/threejs/build/three.min.js'
-			'./bower_components/stats.js/build/stats.min.js'
-		]
-		.pipe gulp.dest './dist/libs'
-
-		gulp.src './res/**'
-		.pipe gulp.dest './dist/res'

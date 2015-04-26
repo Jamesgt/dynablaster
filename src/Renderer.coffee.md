@@ -3,6 +3,7 @@ Renderer
 	{PassEventEmitter} = require 'pee'
 	{Table} = require './Table.coffee.md'
 	{Constants} = require './Constants.coffee.md'
+	{Settings} = require './Settings.coffee.md'
 
 	class exports.Renderer extends PassEventEmitter
 
@@ -43,11 +44,13 @@ Renderer
 
 			@on 'render', => requestAnimationFrame => @render()
 			@on 'addLight', (e) =>
+				return unless Settings.get 'lights'
 				@lights.add light = new THREE.PointLight 0xffffff, 0, 3 * Constants.TILE_SIZE
 				p = @toRenderCoords e
 				light.position.set p.x, p.y, p.z + 2 * Constants.TILE_SIZE
 				light.name = e.y + ',' + e.x
 			@on 'setLight', (e) =>
+				return unless Settings.get 'lights'
 				light = @lights.getObjectByName e.y + ',' + e.x
 				light.intensity = e.v
 				light.color = new THREE.Color @lightParams[e.type].color
@@ -112,7 +115,8 @@ Renderer
 			mesh = @entities.getObjectById cell.meshId
 			p = @toRenderCoords cell
 			mesh.position.set p.x, p.y, p.z
-			unless isNaN parseInt cell.type # player
+			isTypePlayer = not isNaN parseInt cell.type
+			if isTypePlayer and Settings.get 'playerAnimation'
 				mesh.rotation.y = -2 * Math.PI * (cell.subX + Constants.SUB_LIMIT - 1) / Constants.SUB_ROTATE_RATE
 				mesh.rotation.x =  2 * Math.PI * (cell.subY + Constants.SUB_LIMIT - 1) / Constants.SUB_ROTATE_RATE
 

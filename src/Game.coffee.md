@@ -1,10 +1,12 @@
 Game base class
 
+	{PassEventEmitter} = require 'pee'
+
 	{Table} = require './Table.coffee.md'
 	{Renderer} = require './Renderer.coffee.md'
 	{Player} = require './Player.coffee.md'
 	{Keyboard} = require './Keyboard.coffee.md'
-	{PassEventEmitter} = require 'pee'
+	{Settings} = require './Settings.coffee.md'
 
 	class exports.Game extends PassEventEmitter
 
@@ -14,14 +16,23 @@ Game base class
 		players: {}
 
 		constructor: (@parentId) ->
+			$('input[type="checkbox"]').bootstrapSwitch()
+			Settings.init 'dynablaster',
+				lights: yes
+				playerAnimation: yes
+				name: ''
+
+			$('.modal').on 'hidden.bs.modal', (e) => setTimeout => @renderer.focus()
+
 			$('#reset').click =>
 				@reset()
 				@renderer.focus()
+
 			window.stats = new Stats()
 			window.stats.setMode 1
 			window.stats.domElement.style.position = 'absolute'
 			window.stats.domElement.style.bottom = '0px'
-			$("#controls").append window.stats.domElement
+			$("#stats").append window.stats.domElement
 
 			@table = new Table @w, @h
 
@@ -55,4 +66,5 @@ Game base class
 			@table.standard()
 			@players['1'].reset @w-2, @h-2
 			@players['2'].reset 1, 1
+			@table.standardPowerups()
 			@renderer.emit 'render'

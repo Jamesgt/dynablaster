@@ -34,10 +34,11 @@ Player
 			@on 'explosion', => @bombs--
 
 			@on 'cellChanged', (e) =>
-				switch e.type
-					when 'F' then Player.getGlobal().emit 'death', @type
+				switch e.newCell.type
 					when '+F' then @firePower++
 					when '+B' then @maxBombs++
+				switch e.newCellDelayed.type
+					when 'F' then Player.getGlobal().emit 'death', @type
 
 			@reset @x, @y
 

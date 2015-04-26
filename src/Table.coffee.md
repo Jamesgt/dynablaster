@@ -141,7 +141,8 @@ Sub cordinates represent the player position inside the cell.
 			v.subX = @flipSub v.subX + x
 			v.subY = @flipSub v.subY + y
 			newCell = @get(Table.LAYER.BASE, v.x, v.y)
-			v.emit 'cellChanged', newCell
+			newCellDelayed = @get(Table.LAYER.DELAYED, v.x, v.y)
+			v.emit 'cellChanged', {newCell, newCellDelayed}
 			@emit 'setLight', {x: v.x, y: v.y, v: 0, type: newCell.type} if newCell.type[0] is Table.POWERUP_PREFIX
 			@set Table.LAYER.BASE, v.x, v.y, v
 			@emitMove v
@@ -217,7 +218,10 @@ Sub cordinates represent the player position inside the cell.
 		fire: (x, y) ->
 			cell = @get Table.LAYER.BASE, x, y
 			return yes if cell.type is Table.OUT # edge
-			cell.emit 'cellChanged', {type: Table.FIRE} unless isNaN parseInt cell.type # player
+			unless isNaN parseInt cell.type # player
+				cell.emit 'cellChanged', 
+					newCell: type: Table.EMPTY
+					newCellDelayed: type: Table.FIRE
 			switch cell.type
 				when Table.WALL then return yes
 				when Table.STONE then return @setOnFire x, y, yes

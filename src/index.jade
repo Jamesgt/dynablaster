@@ -3,17 +3,89 @@ html
 	head
 		title Dynablaster
 
-		script(src='http://localhost:35729/livereload.js?snipver=1')
-		script(src='libs/jquery.min.js')
-		script(src='libs/three.min.js')
-		script(src='libs/stats.min.js')
+		- if (dev)
+			script(src='http://localhost:35729/livereload.js?snipver=1')
+		
+		script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js')
+		script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js')
+		//- script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.2.1/js/bootstrap-switch.min.js')
+		script(src='/libs/bootstrap-switch/3.2.2/js/bootstrap-switch.js')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/stats.js/r11/Stats.js')
+		script(src='//www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js')
+			
 		script(src='game.js')
 
 		mixin css(href)
 			link(type='text/css', rel='stylesheet', href=href)
 
+		+css('//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css')
+		+css('//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css')
+		//- +css('//cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.2.2/css/bootstrap3/bootstrap-switch.min.css')
+		+css('/libs/bootstrap-switch/3.2.2/css/bootstrap-switch.min.css')
 		+css('game.css')
 	body
-		div#controls
-			button#reset Reset
+		mixin modal(id)
+			div.modal.fade(id=id)
+				div.modal-dialog
+					div.modal-content
+						div.modal-header
+							button.close(type='button', data-dismiss='modal')
+								span(aria-hidden='true') &times;
+								span.sr-only Close
+							h4.text-center.modal-title Dynablaster
+							div.text-center.small.version v0.1.1
+						div.modal-body
+							block
+						div.modal-footer
+							span written by 
+								a(href='http://en.gravatar.com/jamesgt', target='_blank') Jamesgt
+		+modal('settings')
+			h4.text-center Settings
+			div.alert.alert-warning(role='alert') Lights are not working on some graphic cards. Reload needed after change.
+			input(type='checkbox', data-persist='lights', checked, data-label-text='Lights')
+			input(type='checkbox', data-persist='playerAnimation', checked, data-label-text='Player animation')
+			hr
+			h4.text-center Friends
+			div.container-fluid
+				mixin friend(name, link)
+					div.row
+						div.col-md-2.col-xs-6= name
+						div.col-md-10.col-xs-6: a(href=link, target='_blank')= link
+				+friend('Atom', 'https://atom.io/')
+				+friend('CoffeeScript', 'http://coffeescript.org/')
+				+friend('Jade', 'http://jade-lang.com/')
+				+friend('Stylus', 'http://learnboost.github.io/stylus/')
+				+friend('Node.js', 'http://nodejs.org/')
+				+friend('npm', 'https://www.npmjs.org/')
+				+friend('three.js', 'http://threejs.org/')
+				+friend('jQuery', 'http://jquery.com/')
+				+friend('Bootstrap', 'http://getbootstrap.com/')
+				+friend('Dropbox', 'https://www.dropbox.com/')
+				+friend('Bower', 'http://bower.io/')
+				+friend('Express', 'http://expressjs.com/')
+				+friend('Gulp', 'http://gulpjs.com/')
+				+friend('texturelib', 'http://texturelib.com/')
+				+friend('GitHub', 'https://github.com/')
+				+friend('Chrome', 'http://www.google.com/chrome/')
+		+modal('multiplayer')
+			div.row
+				div.col-lg-6
+					div.input-group
+						input#name.form-control(type='text', placeholder='Your name', data-persist='name')
+						span.input-group-btn
+							button#go.btn.btn-info(type='button', data-persist-target='#name') Go!
+			table#lobby.table: tbody
+				tr.etalon
+					td Etalon
+					td: button.btn.btn-warning.btn-sm(type='button', data-name='James', disabled): | Join
+			
+		div.overlay.container-fluid
+			div.row
+				div.pull-right
+					button.btn.btn-primary.btn-lg(type='button', data-toggle='modal', data-target='#multiplayer')
+						span.glyphicon.glyphicon-globe
+					button.btn.btn-primary.btn-lg(type='button', data-toggle='modal', data-target='#settings')
+						span.glyphicon.glyphicon-cog
+			div#stats
 		span#container

@@ -19,6 +19,7 @@
   "dependencies": {
     "jquery": "~2.1.1",
     "threejs": "*",
-    "stats.js": "*"
+    "stats.js": "*",
+    "bootstrap-switch": "~3.2.2"
   }
 }

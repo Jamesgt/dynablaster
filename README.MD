@@ -9,6 +9,7 @@ http://goo.gl/pkV943
 
 Plans:
 
+- Touch controls
 - Multiplayer
   - 5 player
   - p (webrtc)

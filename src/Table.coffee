@@ -1,4 +1,3 @@
-arrayShuffle = require 'array-shuffle'
 {PassEventEmitter} = require 'pee'
 {Constants} = require './Constants.coffee'
 
@@ -63,7 +62,7 @@ class exports.Table extends PassEventEmitter
 			for x in [0...@w]
 				cell = @get Table.LAYER.BASE, x, y
 				stoneCells.push cell if cell.type is Table.STONE
-		stoneCells = arrayShuffle stoneCells
+		stoneCells = _.shuffle stoneCells
 		for type, count of Table.POWERUP_COUNTS
 			for [0...count]
 				stoneCells.pop().powerup = {type: Table.POWERUP_PREFIX + type}

@@ -12,7 +12,6 @@
     "url": "https://github.com/Jamesgt/dynablaster"
   },
   "devDependencies": {
-    "array-shuffle": "^1.0.0",
     "coffee-script": "^1.9.3",
     "coffeeify": "^1.1.0",
     "express": "^5.0.0-alpha.2",

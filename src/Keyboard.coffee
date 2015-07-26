@@ -15,6 +15,24 @@ class exports.Keyboard extends PassEventEmitter
 
 	INTERVAL: 40
 
+	@KEYS:
+		ARROW_LEFT: 37
+		ARROW_UP: 38
+		ARROW_RIGHT: 39
+		ARROW_DOWN: 40
+		ENTER: 13
+		A: 65
+		W: 87
+		D: 68
+		S: 83
+		SPACE: 32
+
+	@SETS:
+		ARROWS: [Keyboard.KEYS.ARROW_LEFT, Keyboard.KEYS.ARROW_UP, Keyboard.KEYS.ARROW_RIGHT, Keyboard.KEYS.ARROW_DOWN]
+		WASD: [Keyboard.KEYS.A, Keyboard.KEYS.W, Keyboard.KEYS.D, Keyboard.KEYS.S]
+	Keyboard.SETS.ARROWS_ENTER = [Keyboard.SETS.ARROWS, [Keyboard.KEYS.ENTER]]
+	Keyboard.SETS.WASD_SPACE = [Keyboard.SETS.WASD, [Keyboard.KEYS.SPACE]]
+
 	###
 	The `keys` map is an internal storage for easy lookup. `keyCode -> {groupIndex, id, event}`
 	The `status` map is storing the actual key state.

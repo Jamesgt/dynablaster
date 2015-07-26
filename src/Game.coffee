@@ -38,8 +38,8 @@ class exports.Game extends PassEventEmitter
 		@table.pass 'render remove removeAll add setPosition addLight setLight', @renderer
 
 		@keyboard = new Keyboard [['left', 'up', 'right', 'down'], ['action']],
-			'1': [[37, 38, 39, 40], [13]] # left, up, right, down and enter
-			'2': [[65, 87, 68, 83], [32]] # a, w, d, s and space
+			'1': Keyboard.SETS.ARROWS_ENTER
+			'2': Keyboard.SETS.WASD_SPACE
 
 		@table.standard()
 
